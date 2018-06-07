@@ -1,6 +1,7 @@
 // draw.cpp : Defines the entry point for the application.
 //
 
+//Projekt 4
 #include "stdafx.h"
 #include "draw.h"
 
