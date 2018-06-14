@@ -24,6 +24,12 @@ klocek pierwszy;
 klocek drugi;
 klocek trzeci;
 
+int x=300;
+int y=150; 
+
+HWND hwndButton;
+
+RECT masy = { 710, 70, 750, 300 };
 
 
 // Forward declarations of functions included in this code module:
@@ -51,6 +57,8 @@ void MyOnPaint(HDC hdc)
 	RECT klocek2 = { drugi.x, drugi.y, drugi.x + 100, drugi.y + 100 };
 	RECT klocek3 = { trzeci.x, trzeci.y, trzeci.x+100, trzeci.y+100 };
 
+	graphics.DrawLine(&pen, x, 20, x, y);
+
 	graphics.DrawRectangle(&pen, 20, 10, 650, 510);
 
 	std::wstring tempstring = std::to_wstring(pierwszy.masa);								// wyswietlanie mas klockow
@@ -60,14 +68,14 @@ void MyOnPaint(HDC hdc)
 	PointF point1b(710, 70);
 	graphics.DrawString(tempchar, -1, &font, point1b, &brushR);
 
-	tempstring = std::to_wstring(pierwszy.masa);											
+	tempstring = std::to_wstring(drugi.masa);											
 	tempchar = tempstring.c_str();
 	PointF point2a(710, 125);
 	graphics.DrawString(L"Masa zielonego klocka:", -1, &font, point2a, &brushG);
 	PointF point2b(710, 170);
 	graphics.DrawString(tempchar, -1, &font, point2b, &brushG);
 
-	tempstring = std::to_wstring(pierwszy.masa);											
+	tempstring = std::to_wstring(trzeci.masa);											
 	tempchar = tempstring.c_str();
 	PointF point3a(710, 225);
 	graphics.DrawString(L"Masa niebieskiego klocka:", -1, &font, point3a, &brushB);
@@ -82,6 +90,16 @@ void MyOnPaint(HDC hdc)
 	FillRect(hdc, &klocek3, trzeci.kolor);
 }
 
+void repaintWindow(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, RECT *drawArea)
+{
+	if (drawArea == NULL)
+		InvalidateRect(hWnd, drawArea, TRUE); //	repaint all
+	else
+		InvalidateRect(hWnd, drawArea, TRUE); //	repaint drawArea
+	hdc = BeginPaint(hWnd, &ps);
+	MyOnPaint(hdc);
+	EndPaint(hWnd, &ps);
+}
 
 int OnCreate(HWND window)
 {
@@ -199,6 +217,66 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME ^ WS_MAXIMIZEBOX,
       CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
    
+   hwndButton = CreateWindow(TEXT("button"),                      // The class name required is button
+	   TEXT("Zwieksz"),                  // the caption of the button
+	   WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,  // the styles
+	   770, 65,                                  // the left and top co-ordinates
+	   80, 40,                              // width and height
+	   hWnd,                                 // parent window handle
+	   (HMENU)ID_BUTTON1,                   // the ID of your button
+	   hInstance,                            // the instance of your application
+	   NULL);                               // extra bits you dont really need
+
+   hwndButton = CreateWindow(TEXT("button"),                      // The class name required is button
+	   TEXT("Zmniejsz"),                  // the caption of the button
+	   WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,  // the styles
+	   870, 65,                                  // the left and top co-ordinates
+	   80, 40,                              // width and height
+	   hWnd,                                 // parent window handle
+	   (HMENU)ID_BUTTON2,                   // the ID of your button
+	   hInstance,                            // the instance of your application
+	   NULL);                               // extra bits you dont really need
+
+   hwndButton = CreateWindow(TEXT("button"),                      // The class name required is button
+	   TEXT("Zwieksz"),                  // the caption of the button
+	   WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,  // the styles
+	   770, 165,                                  // the left and top co-ordinates
+	   80, 40,                              // width and height
+	   hWnd,                                 // parent window handle
+	   (HMENU)ID_BUTTON3,                   // the ID of your button
+	   hInstance,                            // the instance of your application
+	   NULL);                               // extra bits you dont really need
+
+   hwndButton = CreateWindow(TEXT("button"),                      // The class name required is button
+	   TEXT("Zmniejsz"),                  // the caption of the button
+	   WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,  // the styles
+	   870, 165,                                  // the left and top co-ordinates
+	   80, 40,                              // width and height
+	   hWnd,                                 // parent window handle
+	   (HMENU)ID_BUTTON4,                   // the ID of your button
+	   hInstance,                            // the instance of your application
+	   NULL);                               // extra bits you dont really need
+
+   hwndButton = CreateWindow(TEXT("button"),                      // The class name required is button
+	   TEXT("Zwieksz"),                  // the caption of the button
+	   WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,  // the styles
+	   770, 265,                                  // the left and top co-ordinates
+	   80, 40,                              // width and height
+	   hWnd,                                 // parent window handle
+	   (HMENU)ID_BUTTON5,                   // the ID of your button
+	   hInstance,                            // the instance of your application
+	   NULL);                               // extra bits you dont really need
+
+   hwndButton = CreateWindow(TEXT("button"),                      // The class name required is button
+	   TEXT("Zmniejsz"),                  // the caption of the button
+	   WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,  // the styles
+	   870, 265,                                  // the left and top co-ordinates
+	   80, 40,                              // width and height
+	   hWnd,                                 // parent window handle
+	   (HMENU)ID_BUTTON6,                   // the ID of your button
+	   hInstance,                            // the instance of your application
+	   NULL);                               // extra bits you dont really need
+
    OnCreate(hWnd);
 
    if (!hWnd)
@@ -243,6 +321,30 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 		case IDM_EXIT:
 			DestroyWindow(hWnd);
+			break;
+		case ID_BUTTON1:
+			if(pierwszy.masa<99) pierwszy.masa++;
+			repaintWindow(hWnd, hdc, ps, &masy);
+			break;
+		case ID_BUTTON2:
+			if (pierwszy.masa>1) pierwszy.masa--;
+			repaintWindow(hWnd, hdc, ps, &masy);
+			break;
+		case ID_BUTTON3:
+			if (drugi.masa<99) drugi.masa++;
+			repaintWindow(hWnd, hdc, ps, &masy);
+			break;
+		case ID_BUTTON4:
+			if (drugi.masa>1) drugi.masa--;
+			repaintWindow(hWnd, hdc, ps, &masy);
+			break;
+		case ID_BUTTON5:
+			if (trzeci.masa<99) trzeci.masa++;
+			repaintWindow(hWnd, hdc, ps, &masy);
+			break;
+		case ID_BUTTON6:
+			if (trzeci.masa>1) trzeci.masa--;
+			repaintWindow(hWnd, hdc, ps, &masy);
 			break;
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);

@@ -19,6 +19,15 @@
 #endif
 // Values for other objects (eg. buttons)
 
+#define ID_BUTTON1        201              //	klocek 1 +
+#define ID_BUTTON2        202              //	klocek 1 -
+#define ID_BUTTON3        203              //	klocek 2 +
+#define ID_BUTTON4        204              //	klocek 2 -
+#define ID_BUTTON5        205              //	klocek 3 +
+#define ID_BUTTON6        206              //	klocek 3 -
+
+
+
 
 
 // Next default values for new objects
