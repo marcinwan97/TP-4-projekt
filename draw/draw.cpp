@@ -24,6 +24,8 @@ klocek pierwszy;
 klocek drugi;
 klocek trzeci;
 
+klocek* zlapany = NULL;
+
 int x=300;
 int y=151; 
 
@@ -60,7 +62,7 @@ void MyOnPaint(HDC hdc)
 	RECT klocek3 = { trzeci.x, trzeci.y, trzeci.x+100, trzeci.y+100 };
 
 	graphics.DrawLine(&pen, x, 40, x, y);
-	FillRect(hdc, &dzwig3, hbrush);
+	
 
 
 	graphics.DrawRectangle(&pen, 20, 10, 650, 510);
@@ -89,6 +91,7 @@ void MyOnPaint(HDC hdc)
 
 	FillRect(hdc, &dzwig1, hbrush);
 	FillRect(hdc, &dzwig2, hbrush);
+	FillRect(hdc, &dzwig3, hbrush);
 	FillRect(hdc, &klocek1, pierwszy.kolor);
 	FillRect(hdc, &klocek2, drugi.kolor);
 	FillRect(hdc, &klocek3, trzeci.kolor);
@@ -103,6 +106,32 @@ void repaintWindow(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, RECT *drawArea)
 	hdc = BeginPaint(hWnd, &ps);
 	MyOnPaint(hdc);
 	EndPaint(hWnd, &ps);
+}
+
+bool kolizjagora(struct klocek sprawdzany)
+{
+	if (x >= sprawdzany.x - 9 && x <= sprawdzany.x + 109 && y > sprawdzany.y - 1 && y < sprawdzany.y + 99) return true;
+	else return false;
+}
+
+bool kolizjadol(struct klocek sprawdzany)
+{
+	if (x >= sprawdzany.x - 9 && x <= sprawdzany.x + 109 && y == sprawdzany.y + 109) return true;
+	else return false;
+}
+
+bool kolizjalewa(struct klocek sprawdzany)
+{
+	if (x == sprawdzany.x + 110 && y >= sprawdzany.y && y <= sprawdzany.y + 108) return true;
+	if (y >= sprawdzany.y + 109 && x == sprawdzany.x + 100) return true;
+	else return false;
+}
+
+bool kolizjaprawa(struct klocek sprawdzany)
+{
+	if (x == sprawdzany.x - 10 && y >= sprawdzany.y && y <= sprawdzany.y + 108) return true;
+	if (y >= sprawdzany.y + 109 && x == sprawdzany.x - 2) return true;
+	else return false;
 }
 
 int OnCreate(HWND window)
@@ -364,24 +393,49 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		switch (wParam)
 		{
-		case 0x57:
-			if (y > 80) y -= 2;
+		case 0x57:    // w
+			if (y > 80 && !kolizjadol(pierwszy) && !kolizjadol(drugi) && !kolizjadol(trzeci))
+			{
+				y -= 2;
+				if (zlapany != NULL) zlapany->y -= 2;
+			}
 			repaintWindow(hWnd, hdc, ps, &pole);
 			break;
-		case 0x53:
-			if (y < 418) y += 2;
+		case 0x53:    // s
+			if (y < 418 && !kolizjagora(pierwszy) && !kolizjagora(drugi) && !kolizjagora(trzeci))
+			{
+				y += 2;
+				if (zlapany != NULL) zlapany->y += 2;
+			}
 			repaintWindow(hWnd, hdc, ps, &pole);
 			break;
-		case 0x41:
-			if (x > 150) x-=2;
+		case 0x41:    // a
+			if (x > 150 && !kolizjalewa(pierwszy) && !kolizjalewa(drugi) && !kolizjalewa(trzeci))
+			{
+				x -= 2;
+				if (zlapany != NULL) zlapany->x -= 2;
+			}
 			repaintWindow(hWnd, hdc, ps, &pole);
 			break;
-		case 0x44:
-			if (x < 600) x += 2;
+		case 0x44:   // d
+			if (x < 600 && !kolizjaprawa(pierwszy) && !kolizjaprawa(drugi) && !kolizjaprawa(trzeci))
+			{
+				x += 2;
+				if (zlapany != NULL) zlapany->x += 2;
+			}
 			repaintWindow(hWnd, hdc, ps, &pole);
 			break;
 		case VK_SPACE:
-			MessageBox(hWnd, L"Wciœniêto spacje", L"OK", MB_ICONINFORMATION);
+			if (zlapany == NULL)
+			{
+				if (x >= pierwszy.x + 35 && x <= pierwszy.x + 65 && y == pierwszy.y - 1) zlapany = &pierwszy;
+				if (x >= drugi.x + 35 && x <= drugi.x + 65 && y == drugi.y - 1) zlapany = &drugi;
+				if (x >= trzeci.x + 35 && x <= trzeci.x + 65 && y == trzeci.y - 1) zlapany = &trzeci;
+			}
+			else
+			{
+				zlapany = NULL;
+			}
 			break;
 		}
 	}
