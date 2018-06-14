@@ -1,9 +1,9 @@
 // draw.cpp : Defines the entry point for the application.
 //
 
-//Projekt 4 tp
 #include "stdafx.h"
 #include "draw.h"
+#include <string>
 
 #define MAX_LOADSTRING 100
 
@@ -12,7 +12,19 @@ HINSTANCE hInst;								// current instance
 TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
 
-INT value;
+struct klocek
+{
+	int masa=10;
+	int x;
+	int y;
+	HBRUSH kolor;
+};
+
+klocek pierwszy;
+klocek drugi;
+klocek trzeci;
+
+
 
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -23,13 +35,66 @@ INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 
 void MyOnPaint(HDC hdc)
 {
+	Graphics graphics(hdc);
+	Pen pen(Color(255, 0, 0, 0));
+	SolidBrush brush(Color(255, 15, 30, 110));
+	SolidBrush brushR(Color(255, 255, 50, 50));
+	SolidBrush brushG(Color(255, 50, 255, 50));
+	SolidBrush brushB(Color(255, 50, 50, 255));
 
+	Font font(L"Arial", 20);
+	HBRUSH hbrush = CreateSolidBrush(RGB(100, 100, 100));
+
+	RECT dzwig1 = { 60, 20, 100, 520 };
+	RECT dzwig2 = { 30, 20, 650, 55 };
+	RECT klocek1 = { pierwszy.x, pierwszy.y, pierwszy.x + 100, pierwszy.y + 100 };
+	RECT klocek2 = { drugi.x, drugi.y, drugi.x + 100, drugi.y + 100 };
+	RECT klocek3 = { trzeci.x, trzeci.y, trzeci.x+100, trzeci.y+100 };
+
+	graphics.DrawRectangle(&pen, 20, 10, 650, 510);
+
+	std::wstring tempstring = std::to_wstring(pierwszy.masa);								// wyswietlanie mas klockow
+	const wchar_t* tempchar = tempstring.c_str();
+	PointF point1a(710, 25);
+	graphics.DrawString(L"Masa czerwonego klocka:", -1, &font, point1a, &brushR);
+	PointF point1b(710, 70);
+	graphics.DrawString(tempchar, -1, &font, point1b, &brushR);
+
+	tempstring = std::to_wstring(pierwszy.masa);											
+	tempchar = tempstring.c_str();
+	PointF point2a(710, 125);
+	graphics.DrawString(L"Masa zielonego klocka:", -1, &font, point2a, &brushG);
+	PointF point2b(710, 170);
+	graphics.DrawString(tempchar, -1, &font, point2b, &brushG);
+
+	tempstring = std::to_wstring(pierwszy.masa);											
+	tempchar = tempstring.c_str();
+	PointF point3a(710, 225);
+	graphics.DrawString(L"Masa niebieskiego klocka:", -1, &font, point3a, &brushB);
+	PointF point3b(710, 270);
+	graphics.DrawString(tempchar, -1, &font, point3b, &brushB);
+
+
+	FillRect(hdc, &dzwig1, hbrush);
+	FillRect(hdc, &dzwig2, hbrush);
+	FillRect(hdc, &klocek1, pierwszy.kolor);
+	FillRect(hdc, &klocek2, drugi.kolor);
+	FillRect(hdc, &klocek3, trzeci.kolor);
 }
 
 
 int OnCreate(HWND window)
 {
-
+	pierwszy.x = 140;
+	pierwszy.y = 420;
+	pierwszy.kolor = CreateSolidBrush(RGB(250, 100, 100));
+	drugi.x = 340;
+	drugi.y = 420;
+	drugi.kolor = CreateSolidBrush(RGB(100, 250, 100));
+	trzeci.x = 540;
+	trzeci.y = 420;
+	trzeci.kolor = CreateSolidBrush(RGB(100, 100, 250));
+	SetWindowText(window, L"Zad 4.4 - Marcin Wankiewicz, Kacper Wojciechowski, Bartosz S³owiñski");
    return 0;
 }
 
@@ -131,7 +196,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    hInst = hInstance; // Store instance handle in our global variable
 
-   hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+   hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME ^ WS_MAXIMIZEBOX,
       CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
    
    OnCreate(hWnd);
@@ -183,6 +248,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
 		break;
+	case WM_KEYDOWN:
+	{
+		switch (wParam)
+		{
+		case 0x57:
+			MessageBox(hWnd, L"Wciœniêto W", L"OK", MB_ICONINFORMATION);
+			break;
+		case 0x53:
+			MessageBox(hWnd, L"Wciœniêto S", L"OK", MB_ICONINFORMATION);
+			break;
+		case 0x41:
+			MessageBox(hWnd, L"Wciœniêto A", L"OK", MB_ICONINFORMATION);
+			break;
+		case 0x44:
+			MessageBox(hWnd, L"Wciœniêto D", L"OK", MB_ICONINFORMATION);
+			break;
+		case VK_SPACE:
+			MessageBox(hWnd, L"Wciœniêto spacje", L"OK", MB_ICONINFORMATION);
+			break;
+		}
+	}
+	break;
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
 		// TODO: Add any drawing code here...
