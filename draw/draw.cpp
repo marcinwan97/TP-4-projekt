@@ -25,11 +25,12 @@ klocek drugi;
 klocek trzeci;
 
 int x=300;
-int y=150; 
+int y=151; 
 
 HWND hwndButton;
 
 RECT masy = { 710, 70, 750, 300 };
+RECT pole = { 100, 55, 670, 520 };
 
 
 // Forward declarations of functions included in this code module:
@@ -53,11 +54,14 @@ void MyOnPaint(HDC hdc)
 
 	RECT dzwig1 = { 60, 20, 100, 520 };
 	RECT dzwig2 = { 30, 20, 650, 55 };
+	RECT dzwig3 = { x - 10, y - 10, x + 10, y+1 };
 	RECT klocek1 = { pierwszy.x, pierwszy.y, pierwszy.x + 100, pierwszy.y + 100 };
 	RECT klocek2 = { drugi.x, drugi.y, drugi.x + 100, drugi.y + 100 };
 	RECT klocek3 = { trzeci.x, trzeci.y, trzeci.x+100, trzeci.y+100 };
 
-	graphics.DrawLine(&pen, x, 20, x, y);
+	graphics.DrawLine(&pen, x, 40, x, y);
+	FillRect(hdc, &dzwig3, hbrush);
+
 
 	graphics.DrawRectangle(&pen, 20, 10, 650, 510);
 
@@ -325,26 +329,32 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case ID_BUTTON1:
 			if(pierwszy.masa<99) pierwszy.masa++;
 			repaintWindow(hWnd, hdc, ps, &masy);
+			SetFocus(hWnd);
 			break;
 		case ID_BUTTON2:
 			if (pierwszy.masa>1) pierwszy.masa--;
 			repaintWindow(hWnd, hdc, ps, &masy);
+			SetFocus(hWnd);
 			break;
 		case ID_BUTTON3:
 			if (drugi.masa<99) drugi.masa++;
 			repaintWindow(hWnd, hdc, ps, &masy);
+			SetFocus(hWnd);
 			break;
 		case ID_BUTTON4:
 			if (drugi.masa>1) drugi.masa--;
 			repaintWindow(hWnd, hdc, ps, &masy);
+			SetFocus(hWnd);
 			break;
 		case ID_BUTTON5:
 			if (trzeci.masa<99) trzeci.masa++;
 			repaintWindow(hWnd, hdc, ps, &masy);
+			SetFocus(hWnd);
 			break;
 		case ID_BUTTON6:
 			if (trzeci.masa>1) trzeci.masa--;
 			repaintWindow(hWnd, hdc, ps, &masy);
+			SetFocus(hWnd);
 			break;
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
@@ -355,16 +365,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		switch (wParam)
 		{
 		case 0x57:
-			MessageBox(hWnd, L"Wciœniêto W", L"OK", MB_ICONINFORMATION);
+			if (y > 80) y -= 2;
+			repaintWindow(hWnd, hdc, ps, &pole);
 			break;
 		case 0x53:
-			MessageBox(hWnd, L"Wciœniêto S", L"OK", MB_ICONINFORMATION);
+			if (y < 418) y += 2;
+			repaintWindow(hWnd, hdc, ps, &pole);
 			break;
 		case 0x41:
-			MessageBox(hWnd, L"Wciœniêto A", L"OK", MB_ICONINFORMATION);
+			if (x > 150) x-=2;
+			repaintWindow(hWnd, hdc, ps, &pole);
 			break;
 		case 0x44:
-			MessageBox(hWnd, L"Wciœniêto D", L"OK", MB_ICONINFORMATION);
+			if (x < 600) x += 2;
+			repaintWindow(hWnd, hdc, ps, &pole);
 			break;
 		case VK_SPACE:
 			MessageBox(hWnd, L"Wciœniêto spacje", L"OK", MB_ICONINFORMATION);
