@@ -25,6 +25,8 @@
 #define ID_BUTTON4        204              //	klocek 2 -
 #define ID_BUTTON5        205              //	klocek 3 +
 #define ID_BUTTON6        206              //	klocek 3 -
+#define ID_BUTTON7		  207			   //	udzwig +
+#define ID_BUTTON8		  208			   //	udzwig -
 
 
 

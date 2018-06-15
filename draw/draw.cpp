@@ -26,14 +26,13 @@ klocek trzeci;
 
 klocek* zlapany = NULL;
 
-int x=300;
-int y=151; 
+int x=300;					// zawsze parzyste
+int y=401;					// zawsze nieparzyste
+int udzwig = 10;
 
 HWND hwndButton;
 
-RECT masy = { 710, 70, 750, 300 };
-RECT pole = { 100, 55, 670, 520 };
-
+RECT masy = { 710, 70, 750, 400 };
 
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -61,7 +60,7 @@ void MyOnPaint(HDC hdc)
 	RECT klocek2 = { drugi.x, drugi.y, drugi.x + 100, drugi.y + 100 };
 	RECT klocek3 = { trzeci.x, trzeci.y, trzeci.x+100, trzeci.y+100 };
 
-	graphics.DrawLine(&pen, x, 40, x, y);
+	graphics.DrawLine(&pen, x, 40, x, y-10);
 	
 
 
@@ -88,6 +87,13 @@ void MyOnPaint(HDC hdc)
 	PointF point3b(710, 270);
 	graphics.DrawString(tempchar, -1, &font, point3b, &brushB);
 
+	tempstring = std::to_wstring(udzwig);
+	tempchar = tempstring.c_str();
+	PointF point4a(710, 325);
+	graphics.DrawString(L"UdŸwig:", -1, &font, point4a, &brush);
+	PointF point4b(710, 370);
+	graphics.DrawString(tempchar, -1, &font, point4b, &brush);
+
 
 	FillRect(hdc, &dzwig1, hbrush);
 	FillRect(hdc, &dzwig2, hbrush);
@@ -108,9 +114,10 @@ void repaintWindow(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, RECT *drawArea)
 	EndPaint(hWnd, &ps);
 }
 
-bool kolizjagora(struct klocek sprawdzany)
+bool kolizjagora(struct klocek sprawdzany, struct klocek* zlapany)
 {
-	if (x >= sprawdzany.x - 9 && x <= sprawdzany.x + 109 && y > sprawdzany.y - 1 && y < sprawdzany.y + 99) return true;
+	if (zlapany != NULL) return false;					//	by nie blokowaæ opuszczania zlapanego klocka
+	if (x >= sprawdzany.x - 9 && x <= sprawdzany.x + 109 && y >= sprawdzany.y - 1 && y < sprawdzany.y + 99) return true;
 	else return false;
 }
 
@@ -132,6 +139,21 @@ bool kolizjaprawa(struct klocek sprawdzany)
 	if (x == sprawdzany.x - 10 && y >= sprawdzany.y && y <= sprawdzany.y + 108) return true;
 	if (y >= sprawdzany.y + 109 && x == sprawdzany.x - 2) return true;
 	else return false;
+}
+
+bool kolizjaklocka(struct klocek* zlapany, char klawisz)
+{
+	if (zlapany == NULL) return false;			// ta funkcja obejmuje tylko kolizje zlapanego klocka z innym klockiem
+	if (klawisz == 's' && zlapany->y + 100 == pierwszy.y && zlapany->x >= pierwszy.x - 98 && zlapany->x <= pierwszy.x + 98) return true;	// kolizja z dolu
+	if (klawisz == 's' && zlapany->y + 100 == drugi.y && zlapany->x >= drugi.x - 98 && zlapany->x <= drugi.x + 98) return true;
+	if (klawisz == 's' && zlapany->y + 100 == trzeci.y && zlapany->x >= trzeci.x - 98 && zlapany->x <= trzeci.x + 98) return true;
+	if (klawisz == 'a' && zlapany->x == pierwszy.x + 100 && zlapany->y >= pierwszy.y - 98 && zlapany->y <= pierwszy.y + 100) return true;	// kolizja z lewej
+	if (klawisz == 'a' && zlapany->x == drugi.x + 100 && zlapany->y >= drugi.y - 98 && zlapany->y <= drugi.y + 100) return true;
+	if (klawisz == 'a' && zlapany->x == trzeci.x + 100 && zlapany->y >= trzeci.y - 98 && zlapany->y <= trzeci.y + 100) return true;
+	if (klawisz == 'd' && zlapany->x + 100 == pierwszy.x && zlapany->y >= pierwszy.y - 98 && zlapany->y <= pierwszy.y + 100) return true;	// kolizja z prawej
+	if (klawisz == 'd' && zlapany->x + 100 == drugi.x && zlapany->y >= drugi.y - 98 && zlapany->y <= drugi.y + 100) return true;
+	if (klawisz == 'd' && zlapany->x + 100 == trzeci.x && zlapany->y >= trzeci.y - 98 && zlapany->y <= trzeci.y + 100) return true;
+	return false;
 }
 
 int OnCreate(HWND window)
@@ -251,7 +273,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
       CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
    
    hwndButton = CreateWindow(TEXT("button"),                      // The class name required is button
-	   TEXT("Zwieksz"),                  // the caption of the button
+	   TEXT("Zwiêksz"),                  // the caption of the button
 	   WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,  // the styles
 	   770, 65,                                  // the left and top co-ordinates
 	   80, 40,                              // width and height
@@ -271,7 +293,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	   NULL);                               // extra bits you dont really need
 
    hwndButton = CreateWindow(TEXT("button"),                      // The class name required is button
-	   TEXT("Zwieksz"),                  // the caption of the button
+	   TEXT("Zwiêksz"),                  // the caption of the button
 	   WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,  // the styles
 	   770, 165,                                  // the left and top co-ordinates
 	   80, 40,                              // width and height
@@ -291,7 +313,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	   NULL);                               // extra bits you dont really need
 
    hwndButton = CreateWindow(TEXT("button"),                      // The class name required is button
-	   TEXT("Zwieksz"),                  // the caption of the button
+	   TEXT("Zwiêksz"),                  // the caption of the button
 	   WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,  // the styles
 	   770, 265,                                  // the left and top co-ordinates
 	   80, 40,                              // width and height
@@ -307,6 +329,26 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	   80, 40,                              // width and height
 	   hWnd,                                 // parent window handle
 	   (HMENU)ID_BUTTON6,                   // the ID of your button
+	   hInstance,                            // the instance of your application
+	   NULL);                               // extra bits you dont really need
+
+   hwndButton = CreateWindow(TEXT("button"),                      // The class name required is button
+	   TEXT("Zwiêksz"),                  // the caption of the button
+	   WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,  // the styles
+	   770, 365,                                  // the left and top co-ordinates
+	   80, 40,                              // width and height
+	   hWnd,                                 // parent window handle
+	   (HMENU)ID_BUTTON7,                   // the ID of your button
+	   hInstance,                            // the instance of your application
+	   NULL);                               // extra bits you dont really need
+
+   hwndButton = CreateWindow(TEXT("button"),                      // The class name required is button
+	   TEXT("Zmniejsz"),                  // the caption of the button
+	   WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,  // the styles
+	   870, 365,                                  // the left and top co-ordinates
+	   80, 40,                              // width and height
+	   hWnd,                                 // parent window handle
+	   (HMENU)ID_BUTTON8,                   // the ID of your button
 	   hInstance,                            // the instance of your application
 	   NULL);                               // extra bits you dont really need
 
@@ -338,6 +380,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	int wmId, wmEvent;
 	PAINTSTRUCT ps;
 	HDC hdc;
+
+	RECT pole = { x-64, 55, x+64, y+102 };
+	if (zlapany == NULL) pole = { x - 13, 55, x + 13, y+3 };
+
 	//OnCreate(hWnd,wParam,lParam);
 	//OnTimer(hWnd,wParam,lParam);
 
@@ -385,6 +431,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			repaintWindow(hWnd, hdc, ps, &masy);
 			SetFocus(hWnd);
 			break;
+		case ID_BUTTON7:
+			if (udzwig<99) udzwig++;
+			repaintWindow(hWnd, hdc, ps, &masy);
+			SetFocus(hWnd);
+			break;
+		case ID_BUTTON8:
+			if (udzwig>1) udzwig--;			
+			repaintWindow(hWnd, hdc, ps, &masy);
+			SetFocus(hWnd);
+			break;
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
@@ -402,7 +458,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			repaintWindow(hWnd, hdc, ps, &pole);
 			break;
 		case 0x53:    // s
-			if (y < 418 && !kolizjagora(pierwszy) && !kolizjagora(drugi) && !kolizjagora(trzeci))
+			if (y < 460 && !kolizjagora(pierwszy, zlapany) && !kolizjagora(drugi, zlapany) && !kolizjagora(trzeci, zlapany) && !kolizjaklocka(zlapany, 's'))
 			{
 				y += 2;
 				if (zlapany != NULL) zlapany->y += 2;
@@ -410,7 +466,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			repaintWindow(hWnd, hdc, ps, &pole);
 			break;
 		case 0x41:    // a
-			if (x > 150 && !kolizjalewa(pierwszy) && !kolizjalewa(drugi) && !kolizjalewa(trzeci))
+			if (x > 150 && !kolizjalewa(pierwszy) && !kolizjalewa(drugi) && !kolizjalewa(trzeci) && !kolizjaklocka(zlapany, 'a'))
 			{
 				x -= 2;
 				if (zlapany != NULL) zlapany->x -= 2;
@@ -418,7 +474,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			repaintWindow(hWnd, hdc, ps, &pole);
 			break;
 		case 0x44:   // d
-			if (x < 600 && !kolizjaprawa(pierwszy) && !kolizjaprawa(drugi) && !kolizjaprawa(trzeci))
+			if (x < 600 && !kolizjaprawa(pierwszy) && !kolizjaprawa(drugi) && !kolizjaprawa(trzeci) && !kolizjaklocka(zlapany, 'd'))
 			{
 				x += 2;
 				if (zlapany != NULL) zlapany->x += 2;
