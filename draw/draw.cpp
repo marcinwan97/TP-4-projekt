@@ -12,6 +12,8 @@ HINSTANCE hInst;								// current instance
 TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
 
+bool moznaodczepic(struct klocek* zlapany);
+
 struct klocek
 {
 	int masa=10;
@@ -45,13 +47,14 @@ void MyOnPaint(HDC hdc)
 {
 	Graphics graphics(hdc);
 	Pen pen(Color(255, 0, 0, 0));
-	SolidBrush brush(Color(255, 15, 30, 110));
-	SolidBrush brushR(Color(255, 255, 50, 50));
-	SolidBrush brushG(Color(255, 50, 255, 50));
-	SolidBrush brushB(Color(255, 50, 50, 255));
+	SolidBrush brush(Color(255, 0, 0, 0));
+	SolidBrush brushR(Color(255, 230, 0, 0));
+	SolidBrush brushG(Color(255, 0, 179, 0));
+	SolidBrush brushB(Color(255, 0, 0, 204));
 
 	Font font(L"Arial", 20);
 	HBRUSH hbrush = CreateSolidBrush(RGB(100, 100, 100));
+	HBRUSH hak = CreateSolidBrush(RGB(0, 0, 0));
 
 	RECT dzwig1 = { 60, 20, 100, 520 };
 	RECT dzwig2 = { 30, 20, 650, 55 };
@@ -94,10 +97,18 @@ void MyOnPaint(HDC hdc)
 	PointF point4b(710, 370);
 	graphics.DrawString(tempchar, -1, &font, point4b, &brush);
 
+	if (x >= pierwszy.x + 35 && x <= pierwszy.x + 65 && y == pierwszy.y - 1 && pierwszy.masa <= udzwig)
+		hak = CreateSolidBrush(RGB(150, 150, 150));
+	if (x >= drugi.x + 35 && x <= drugi.x + 65 && y == drugi.y - 1 && drugi.masa <= udzwig)
+		hak = CreateSolidBrush(RGB(150, 150, 150));
+	if (x >= trzeci.x + 35 && x <= trzeci.x + 65 && y == trzeci.y - 1 && trzeci.masa <= udzwig)
+		hak = CreateSolidBrush(RGB(150, 150, 150));
+	if (zlapany != NULL) hak = CreateSolidBrush(RGB(100, 100, 100));
+	if (zlapany != NULL && moznaodczepic(zlapany)) hak = CreateSolidBrush(RGB(150, 150, 150));
 
 	FillRect(hdc, &dzwig1, hbrush);
 	FillRect(hdc, &dzwig2, hbrush);
-	FillRect(hdc, &dzwig3, hbrush);
+	FillRect(hdc, &dzwig3, hak);
 	FillRect(hdc, &klocek1, pierwszy.kolor);
 	FillRect(hdc, &klocek2, drugi.kolor);
 	FillRect(hdc, &klocek3, trzeci.kolor);
@@ -174,13 +185,13 @@ int OnCreate(HWND window)
 {
 	pierwszy.x = 140;
 	pierwszy.y = 420;
-	pierwszy.kolor = CreateSolidBrush(RGB(250, 100, 100));
+	pierwszy.kolor = CreateSolidBrush(RGB(230, 0, 0));
 	drugi.x = 340;
 	drugi.y = 420;
-	drugi.kolor = CreateSolidBrush(RGB(100, 250, 100));
+	drugi.kolor = CreateSolidBrush(RGB(0, 179, 0));
 	trzeci.x = 540;
 	trzeci.y = 420;
-	trzeci.kolor = CreateSolidBrush(RGB(100, 100, 250));
+	trzeci.kolor = CreateSolidBrush(RGB(0, 0, 204));
 	SetWindowText(window, L"Zad. 4.4 - Marcin Wankiewicz, Kacper Wojciechowski, Bartosz S³owiñski");
    return 0;
 }
@@ -428,43 +439,71 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case ID_BUTTON1:
 			if(pierwszy.masa<99) pierwszy.masa++;
 			repaintWindow(hWnd, hdc, ps, &masy);
+			repaintWindow(hWnd, hdc, ps, &pole);
 			SetFocus(hWnd);
 			break;
 		case ID_BUTTON2:
 			if (pierwszy.masa>1) pierwszy.masa--;
 			repaintWindow(hWnd, hdc, ps, &masy);
+			repaintWindow(hWnd, hdc, ps, &pole);
 			SetFocus(hWnd);
 			break;
 		case ID_BUTTON3:
 			if (drugi.masa<99) drugi.masa++;
 			repaintWindow(hWnd, hdc, ps, &masy);
+			repaintWindow(hWnd, hdc, ps, &pole);
 			SetFocus(hWnd);
 			break;
 		case ID_BUTTON4:
 			if (drugi.masa>1) drugi.masa--;
 			repaintWindow(hWnd, hdc, ps, &masy);
+			repaintWindow(hWnd, hdc, ps, &pole);
 			SetFocus(hWnd);
 			break;
 		case ID_BUTTON5:
 			if (trzeci.masa<99) trzeci.masa++;
 			repaintWindow(hWnd, hdc, ps, &masy);
+			repaintWindow(hWnd, hdc, ps, &pole);
 			SetFocus(hWnd);
 			break;
 		case ID_BUTTON6:
 			if (trzeci.masa>1) trzeci.masa--;
 			repaintWindow(hWnd, hdc, ps, &masy);
+			repaintWindow(hWnd, hdc, ps, &pole);
 			SetFocus(hWnd);
 			break;
 		case ID_BUTTON7:
 			if (udzwig<99) udzwig++;
 			repaintWindow(hWnd, hdc, ps, &masy);
+			repaintWindow(hWnd, hdc, ps, &pole);
 			SetFocus(hWnd);
 			break;
 		case ID_BUTTON8:
 			if (udzwig>1) udzwig--;			
 			repaintWindow(hWnd, hdc, ps, &masy);
+			repaintWindow(hWnd, hdc, ps, &pole);
 			SetFocus(hWnd);
 			break;
+		case ID_BUTTON9:
+			pierwszy.masa = drugi.masa = trzeci.masa = udzwig = 10; 
+			pierwszy.y = drugi.y = trzeci.y = 420; 
+			pierwszy.x = 140; 
+			drugi.x = 340;
+			trzeci.x = 540;
+			zlapany = NULL;
+			x = 350; 
+			y = 301; 
+			EnableWindow(GetDlgItem(hWnd, ID_BUTTON1), true);
+			EnableWindow(GetDlgItem(hWnd, ID_BUTTON2), true);
+			EnableWindow(GetDlgItem(hWnd, ID_BUTTON3), true);
+			EnableWindow(GetDlgItem(hWnd, ID_BUTTON4), true);
+			EnableWindow(GetDlgItem(hWnd, ID_BUTTON5), true);
+			EnableWindow(GetDlgItem(hWnd, ID_BUTTON6), true);
+			EnableWindow(GetDlgItem(hWnd, ID_BUTTON7), true);
+			EnableWindow(GetDlgItem(hWnd, ID_BUTTON8), true);
+			repaintWindow(hWnd, hdc, ps, NULL);
+			SetFocus(hWnd);
+		break;
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
@@ -509,22 +548,54 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			if (zlapany == NULL)
 			{
 				if (x >= pierwszy.x + 35 && x <= pierwszy.x + 65 && y == pierwszy.y - 1)
-					if (pierwszy.masa <= udzwig) zlapany = &pierwszy;
-					else MessageBox(hWnd, L"Za du¿a masa!", L"Uwaga!", false);
+					if (pierwszy.masa <= udzwig)
+					{
+						zlapany = &pierwszy;
+						EnableWindow(GetDlgItem(hWnd, ID_BUTTON1), false);	//	blokada zmiany masy i udzwigu
+						EnableWindow(GetDlgItem(hWnd, ID_BUTTON2), false);	//	podniesionego klocka
+						EnableWindow(GetDlgItem(hWnd, ID_BUTTON7), false);
+						EnableWindow(GetDlgItem(hWnd, ID_BUTTON8), false);
+						repaintWindow(hWnd, hdc, ps, &pole);
+					}
 
 				if (x >= drugi.x + 35 && x <= drugi.x + 65 && y == drugi.y - 1) 
-					if (drugi.masa <= udzwig) zlapany = &drugi;
-					else MessageBox(hWnd, L"Za du¿a masa!", L"Uwaga!", false);
+					if (drugi.masa <= udzwig) 
+					{
+						zlapany = &drugi;
+						EnableWindow(GetDlgItem(hWnd, ID_BUTTON3), false);
+						EnableWindow(GetDlgItem(hWnd, ID_BUTTON4), false);
+						EnableWindow(GetDlgItem(hWnd, ID_BUTTON7), false);
+						EnableWindow(GetDlgItem(hWnd, ID_BUTTON8), false);
+						repaintWindow(hWnd, hdc, ps, &pole);
+					}
 
 				if (x >= trzeci.x + 35 && x <= trzeci.x + 65 && y == trzeci.y - 1)
-					if (trzeci.masa <= udzwig) zlapany = &trzeci;
-					else MessageBox(hWnd, L"Za du¿a masa!", L"Uwaga!" , false);
+					if (trzeci.masa <= udzwig)
+					{
+						zlapany = &trzeci;
+						EnableWindow(GetDlgItem(hWnd, ID_BUTTON5), false);
+						EnableWindow(GetDlgItem(hWnd, ID_BUTTON6), false);
+						EnableWindow(GetDlgItem(hWnd, ID_BUTTON7), false);
+						EnableWindow(GetDlgItem(hWnd, ID_BUTTON8), false);
+						repaintWindow(hWnd, hdc, ps, &pole);
+					}
 			}
 			else
 			{
 				if (zlapany != NULL)
-				if (moznaodczepic(zlapany)) zlapany = NULL;
-				else MessageBox(hWnd, L"Nie mo¿na odczepiæ!", L"Uwaga!", false);
+				if (moznaodczepic(zlapany)) 
+				{
+					zlapany = NULL;
+					EnableWindow(GetDlgItem(hWnd, ID_BUTTON1), true);
+					EnableWindow(GetDlgItem(hWnd, ID_BUTTON2), true);
+					EnableWindow(GetDlgItem(hWnd, ID_BUTTON3), true);
+					EnableWindow(GetDlgItem(hWnd, ID_BUTTON4), true);
+					EnableWindow(GetDlgItem(hWnd, ID_BUTTON5), true);
+					EnableWindow(GetDlgItem(hWnd, ID_BUTTON6), true);
+					EnableWindow(GetDlgItem(hWnd, ID_BUTTON7), true);
+					EnableWindow(GetDlgItem(hWnd, ID_BUTTON8), true);
+					repaintWindow(hWnd, hdc, ps, &pole);
+				}
 			}
 			break;
 		}
