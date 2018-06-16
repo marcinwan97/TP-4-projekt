@@ -27,6 +27,7 @@
 #define ID_BUTTON6        206              //	klocek 3 -
 #define ID_BUTTON7		  207			   //	udzwig +
 #define ID_BUTTON8		  208			   //	udzwig -
+#define ID_BUTTON9		  209			   //	reset
 
 
 

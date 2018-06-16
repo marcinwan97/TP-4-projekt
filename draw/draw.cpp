@@ -147,6 +147,7 @@ bool kolizjaklocka(struct klocek* zlapany, char klawisz)
 	if (klawisz == 's' && zlapany->y + 100 == pierwszy.y && zlapany->x >= pierwszy.x - 98 && zlapany->x <= pierwszy.x + 98) return true;	// kolizja z dolu
 	if (klawisz == 's' && zlapany->y + 100 == drugi.y && zlapany->x >= drugi.x - 98 && zlapany->x <= drugi.x + 98) return true;
 	if (klawisz == 's' && zlapany->y + 100 == trzeci.y && zlapany->x >= trzeci.x - 98 && zlapany->x <= trzeci.x + 98) return true;
+	if (klawisz == 's' && zlapany->y == 420) return true;   // kolizja z podlozem
 	if (klawisz == 'a' && zlapany->x == pierwszy.x + 100 && zlapany->y >= pierwszy.y - 98 && zlapany->y <= pierwszy.y + 100) return true;	// kolizja z lewej
 	if (klawisz == 'a' && zlapany->x == drugi.x + 100 && zlapany->y >= drugi.y - 98 && zlapany->y <= drugi.y + 100) return true;
 	if (klawisz == 'a' && zlapany->x == trzeci.x + 100 && zlapany->y >= trzeci.y - 98 && zlapany->y <= trzeci.y + 100) return true;
@@ -154,6 +155,19 @@ bool kolizjaklocka(struct klocek* zlapany, char klawisz)
 	if (klawisz == 'd' && zlapany->x + 100 == drugi.x && zlapany->y >= drugi.y - 98 && zlapany->y <= drugi.y + 100) return true;
 	if (klawisz == 'd' && zlapany->x + 100 == trzeci.x && zlapany->y >= trzeci.y - 98 && zlapany->y <= trzeci.y + 100) return true;
 	return false;
+}
+
+bool moznaodczepic(struct klocek* zlapany)
+{
+	if (kolizjaklocka(zlapany, 's') || zlapany->y == 420)
+	{
+		if (zlapany->y == 420) return true;
+		else if (zlapany->kolor != drugi.kolor && zlapany->x >= drugi.x - 20 && zlapany->x <= drugi.x + 20) return true;
+		else if (zlapany->kolor != trzeci.kolor && zlapany->x >= trzeci.x - 20 && zlapany->x <= trzeci.x + 20) return true;
+		else if (zlapany->kolor != pierwszy.kolor && zlapany->x >= pierwszy.x - 20 && zlapany->x <= pierwszy.x + 20) return true;
+		else return false;
+	}
+	else return false;
 }
 
 int OnCreate(HWND window)
@@ -167,7 +181,7 @@ int OnCreate(HWND window)
 	trzeci.x = 540;
 	trzeci.y = 420;
 	trzeci.kolor = CreateSolidBrush(RGB(100, 100, 250));
-	SetWindowText(window, L"Zad 4.4 - Marcin Wankiewicz, Kacper Wojciechowski, Bartosz S³owiñski");
+	SetWindowText(window, L"Zad. 4.4 - Marcin Wankiewicz, Kacper Wojciechowski, Bartosz S³owiñski");
    return 0;
 }
 
@@ -352,6 +366,16 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	   hInstance,                            // the instance of your application
 	   NULL);                               // extra bits you dont really need
 
+   hwndButton = CreateWindow(TEXT("button"),                      // The class name required is button
+	   TEXT("Reset"),                  // the caption of the button
+	   WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,  // the styles
+	   1000, 460,                                  // the left and top co-ordinates
+	   100, 40,                              // width and height
+	   hWnd,                                 // parent window handle
+	   (HMENU)ID_BUTTON9,                   // the ID of your button
+	   hInstance,                            // the instance of your application
+	   NULL);                               // extra bits you dont really need
+
    OnCreate(hWnd);
 
    if (!hWnd)
@@ -484,13 +508,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case VK_SPACE:
 			if (zlapany == NULL)
 			{
-				if (x >= pierwszy.x + 35 && x <= pierwszy.x + 65 && y == pierwszy.y - 1) zlapany = &pierwszy;
-				if (x >= drugi.x + 35 && x <= drugi.x + 65 && y == drugi.y - 1) zlapany = &drugi;
-				if (x >= trzeci.x + 35 && x <= trzeci.x + 65 && y == trzeci.y - 1) zlapany = &trzeci;
+				if (x >= pierwszy.x + 35 && x <= pierwszy.x + 65 && y == pierwszy.y - 1)
+					if (pierwszy.masa <= udzwig) zlapany = &pierwszy;
+					else MessageBox(hWnd, L"Za du¿a masa!", L"Uwaga!", false);
+
+				if (x >= drugi.x + 35 && x <= drugi.x + 65 && y == drugi.y - 1) 
+					if (drugi.masa <= udzwig) zlapany = &drugi;
+					else MessageBox(hWnd, L"Za du¿a masa!", L"Uwaga!", false);
+
+				if (x >= trzeci.x + 35 && x <= trzeci.x + 65 && y == trzeci.y - 1)
+					if (trzeci.masa <= udzwig) zlapany = &trzeci;
+					else MessageBox(hWnd, L"Za du¿a masa!", L"Uwaga!" , false);
 			}
 			else
 			{
-				zlapany = NULL;
+				if (zlapany != NULL)
+				if (moznaodczepic(zlapany)) zlapany = NULL;
+				else MessageBox(hWnd, L"Nie mo¿na odczepiæ!", L"Uwaga!", false);
 			}
 			break;
 		}
