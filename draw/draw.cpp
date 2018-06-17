@@ -11,6 +11,9 @@
 HINSTANCE hInst;								// current instance
 TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
+int x = 350;					//	zawsze parzyste
+int y = 301;					//	zawsze nieparzyste
+int udzwig = 10;
 
 struct klocek
 {
@@ -24,15 +27,18 @@ klocek drugi;
 klocek trzeci;
 klocek* zlapany = NULL;
 
-int x = 350;					//	zawsze parzyste
-int y = 301;					//	zawsze nieparzyste
-int udzwig = 10;
-
 HWND hwndButton;
 HBITMAP htlo = (HBITMAP)LoadImage(NULL, L"tlo.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 HBITMAP hbudowa = (HBITMAP)LoadImage(NULL, L"budowa.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+HBRUSH budowa = CreatePatternBrush(hbudowa);
+HBRUSH hak = CreateSolidBrush(RGB(0, 0, 0));
 
 RECT masy = { 710, 70, 750, 400 };
+RECT klocek1;
+RECT klocek2;
+RECT klocek3;
+RECT dzwig1;
+RECT dzwig2;
 
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -54,16 +60,8 @@ void MyOnPaint(HDC hdc)
 	SolidBrush brushB(Color(255, 0, 0, 204));
 	Font font(L"Arial", 20);
 	HBRUSH czarny = CreateSolidBrush(RGB(0, 00, 0));
-	HBRUSH hak = CreateSolidBrush(RGB(0, 0, 0));
-	HBRUSH budowa = CreatePatternBrush(hbudowa);
-	RECT dzwig1 = { x - 10, 50, x + 10, 60 };
-	RECT dzwig2 = { x - 10, y - 10, x + 10, y + 1 };
 	RECT dzwig3 = { 20, 485, 90, 520 };
-	RECT klocek1 = { pierwszy.x, pierwszy.y, pierwszy.x + 100, pierwszy.y + 100 };
-	RECT klocek2 = { drugi.x, drugi.y, drugi.x + 100, drugi.y + 100 };
-	RECT klocek3 = { trzeci.x, trzeci.y, trzeci.x + 100, trzeci.y + 100 };
 	RECT tlo1 = { 20, 10, 670, 520 };
-
 
 	FillRect(hdc, &tlo1, budowa);															//	wypelnianie tla
 
@@ -99,18 +97,10 @@ void MyOnPaint(HDC hdc)
 	PointF point4b(710, 370);
 	graphics.DrawString(tempchar, -1, &font, point4b, &brush);
 
-	if (x >= pierwszy.x + 39 && x <= pierwszy.x + 61 && y == pierwszy.y - 1 && pierwszy.masa <= udzwig)		//	zmiana koloru haka
-		hak = CreateSolidBrush(RGB(221, 170, 28));
-	if (x >= drugi.x + 39 && x <= drugi.x + 61 && y == drugi.y - 1 && drugi.masa <= udzwig)
-		hak = CreateSolidBrush(RGB(221, 170, 28));
-	if (x >= trzeci.x + 39 && x <= trzeci.x + 61 && y == trzeci.y - 1 && trzeci.masa <= udzwig)
-		hak = CreateSolidBrush(RGB(221, 170, 28));
-	if (zlapany != NULL) hak = CreateSolidBrush(RGB(168, 11, 0));
-	if (zlapany != NULL && moznaodczepic(zlapany)) hak = CreateSolidBrush(RGB(221, 170, 28));
-
 	FillRect(hdc, &dzwig1, czarny);																			//	wypelnienie elementow dzwigu
 	FillRect(hdc, &dzwig2, hak);
 	FillRect(hdc, &dzwig3, czarny);
+
 	FillRect(hdc, &klocek1, pierwszy.kolor);																//	rysowanie klockow i wzoru na nich
 	graphics.DrawRectangle(&penR, pierwszy.x, pierwszy.y, 99, 99);
 	graphics.DrawRectangle(&penR, pierwszy.x + 1, pierwszy.y + 1, 97, 97);
@@ -136,6 +126,22 @@ void MyOnPaint(HDC hdc)
 
 void repaintWindow(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, RECT *drawArea)
 {
+	klocek1 = { pierwszy.x, pierwszy.y, pierwszy.x + 100, pierwszy.y + 100 };								//	obliczanie polozenia elementow przed rysowaniem
+	klocek2 = { drugi.x, drugi.y, drugi.x + 100, drugi.y + 100 };
+	klocek3 = { trzeci.x, trzeci.y, trzeci.x + 100, trzeci.y + 100 };
+	dzwig1 = { x - 10, 50, x + 10, 60 };
+	dzwig2 = { x - 10, y - 10, x + 10, y + 1 };
+
+	if (zlapany == NULL) hak = CreateSolidBrush(RGB(0, 0, 0));												//	zmiana koloru haka
+	if (x >= pierwszy.x + 39 && x <= pierwszy.x + 61 && y == pierwszy.y - 1 && pierwszy.masa <= udzwig)
+		hak = CreateSolidBrush(RGB(221, 170, 28));
+	if (x >= drugi.x + 39 && x <= drugi.x + 61 && y == drugi.y - 1 && drugi.masa <= udzwig)
+		hak = CreateSolidBrush(RGB(221, 170, 28));
+	if (x >= trzeci.x + 39 && x <= trzeci.x + 61 && y == trzeci.y - 1 && trzeci.masa <= udzwig)
+		hak = CreateSolidBrush(RGB(221, 170, 28));
+	if (zlapany != NULL) hak = CreateSolidBrush(RGB(168, 11, 0));
+	if (zlapany != NULL && moznaodczepic(zlapany)) hak = CreateSolidBrush(RGB(221, 170, 28));
+
 	if (drawArea == NULL)
 		InvalidateRect(hWnd, drawArea, TRUE); //	repaint all
 	else
@@ -160,6 +166,9 @@ bool kolizjahak(struct klocek sprawdzany, struct klocek* zlapany, char klawisz)
 bool kolizjaklocka(struct klocek* zlapany, char klawisz)
 {
 	if (zlapany == NULL) return false;			//	ta funkcja obejmuje tylko kolizje zlapanego klocka z innym klockiem
+	if (klawisz == 'w' && zlapany->y == pierwszy.y + 100 && zlapany->x >= pierwszy.x - 98 && zlapany->x <= pierwszy.x + 98) return true;	//	kolizja z gory
+	if (klawisz == 'w' && zlapany->y == drugi.y + 100 && zlapany->x >= drugi.x - 98 && zlapany->x <= drugi.x + 98) return true;
+	if (klawisz == 'w' && zlapany->y == trzeci.y + 100 && zlapany->x >= trzeci.x - 98 && zlapany->x <= trzeci.x + 98) return true;
 	if (klawisz == 's' && zlapany->y + 100 == pierwszy.y && zlapany->x >= pierwszy.x - 98 && zlapany->x <= pierwszy.x + 98) return true;	//	kolizja z dolu
 	if (klawisz == 's' && zlapany->y + 100 == drugi.y && zlapany->x >= drugi.x - 98 && zlapany->x <= drugi.x + 98) return true;
 	if (klawisz == 's' && zlapany->y + 100 == trzeci.y && zlapany->x >= trzeci.x - 98 && zlapany->x <= trzeci.x + 98) return true;
@@ -178,12 +187,12 @@ bool moznaodczepic(struct klocek* zlapany)
 	if (kolizjaklocka(zlapany, 's') || zlapany->y == 420)
 	{
 		if (zlapany->y == 420) return true;
-		else if (zlapany->kolor != drugi.kolor && zlapany->x >= drugi.x - 22 && zlapany->x <= drugi.x + 22) return true;
-		else if (zlapany->kolor != trzeci.kolor && zlapany->x >= trzeci.x - 22 && zlapany->x <= trzeci.x + 22) return true;
-		else if (zlapany->kolor != pierwszy.kolor && zlapany->x >= pierwszy.x - 22 && zlapany->x <= pierwszy.x + 22) return true;
-		else return false;
+		if (zlapany->kolor != drugi.kolor && zlapany->x >= drugi.x - 22 && zlapany->x <= drugi.x + 22) return true;
+		if (zlapany->kolor != trzeci.kolor && zlapany->x >= trzeci.x - 22 && zlapany->x <= trzeci.x + 22) return true;
+		if (zlapany->kolor != pierwszy.kolor && zlapany->x >= pierwszy.x - 22 && zlapany->x <= pierwszy.x + 22) return true;
+		return false;
 	}
-	else return false;
+	return false;
 }
 
 int OnCreate(HWND window)
@@ -197,6 +206,11 @@ int OnCreate(HWND window)
 	trzeci.x = 540;
 	trzeci.y = 420;
 	trzeci.kolor = CreateSolidBrush(RGB(0, 0, 204));
+	klocek1 = { pierwszy.x, pierwszy.y, pierwszy.x + 100, pierwszy.y + 100 };
+	klocek2 = { drugi.x, drugi.y, drugi.x + 100, drugi.y + 100 };
+	klocek3 = { trzeci.x, trzeci.y, trzeci.x + 100, trzeci.y + 100 };
+	dzwig1 = { x - 10, 50, x + 10, 60 };
+	dzwig2 = { x - 10, y - 10, x + 10, y + 1 };
 	SetWindowText(window, L"Zad. 4.4 - Marcin Wankiewicz, Kacper Wojciechowski, Bartosz S³owiñski");
    return 0;
 }
@@ -275,7 +289,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.hInstance		= hInstance;
 	wcex.hIcon			= LoadIcon(hInstance, MAKEINTRESOURCE(IDI_DRAW));
 	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground	= (HBRUSH)(CreatePatternBrush(htlo));
+	wcex.hbrBackground = (HBRUSH)(CreatePatternBrush(htlo));										//	malowanie tla wzorem z bitmapy
 	wcex.lpszMenuName	= MAKEINTRESOURCE(IDC_DRAW);
 	wcex.lpszClassName	= szWindowClass;
 	wcex.hIconSm		= LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
@@ -346,8 +360,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	HDC hdc;
 
 	RECT lina = { x - 13, 50, x + 13, y + 3 };								//	prostokaty do odswiezania, ktore skaluja sie w zaleznosci od potrzeby
-	if(zlapany != NULL) lina = { x - 13, 50, x + 13, y + 1 };
-	RECT podniesiony = { x - 64, y-1, x + 64, y + 103 };
+	RECT podniesiony = { x - 64, 50, x + 64, y + 103 };
 
 	//OnCreate(hWnd,wParam,lParam);
 	//OnTimer(hWnd,wParam,lParam);
@@ -443,40 +456,40 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		switch (wParam)
 		{
 		case 0x57:	 // w
-			if (y > 80 && !kolizjahak(pierwszy, zlapany, 'w') && !kolizjahak(drugi, zlapany, 'w') && !kolizjahak(trzeci, zlapany, 'w'))
+			if (y > 80 && !kolizjahak(pierwszy, zlapany, 'w') && !kolizjahak(drugi, zlapany, 'w') && !kolizjahak(trzeci, zlapany, 'w') && !kolizjaklocka(zlapany, 'w'))
 			{
 				y -= 2;
 				if (zlapany != NULL) zlapany->y -= 2;
+				if (zlapany == NULL) repaintWindow(hWnd, hdc, ps, &lina);
+				else repaintWindow(hWnd, hdc, ps, &podniesiony);
 			}
-			repaintWindow(hWnd, hdc, ps, &lina);
-			if (zlapany != NULL) repaintWindow(hWnd, hdc, ps, &podniesiony);
 			break;
 		case 0x53:	// s
-			if (y < 460 && !kolizjahak(pierwszy, zlapany, 's') && !kolizjahak(drugi, zlapany, 's') && !kolizjahak(trzeci, zlapany, 's') && !kolizjaklocka(zlapany, 's'))
+			if (y < 500 && !kolizjahak(pierwszy, zlapany, 's') && !kolizjahak(drugi, zlapany, 's') && !kolizjahak(trzeci, zlapany, 's') && !kolizjaklocka(zlapany, 's'))
 			{
 				y += 2;
 				if (zlapany != NULL) zlapany->y += 2;
+				if (zlapany == NULL) repaintWindow(hWnd, hdc, ps, &lina);
+				else repaintWindow(hWnd, hdc, ps, &podniesiony);
 			}
-			repaintWindow(hWnd, hdc, ps, &lina);
-			if (zlapany != NULL) repaintWindow(hWnd, hdc, ps, &podniesiony);
 			break;
 		case 0x41:    // a
 			if (x > 160 && !kolizjahak(pierwszy, zlapany, 'a') && !kolizjahak(drugi, zlapany, 'a') && !kolizjahak(trzeci, zlapany, 'a') && !kolizjaklocka(zlapany, 'a'))
 			{
 				x -= 2;
 				if (zlapany != NULL) zlapany->x -= 2;
+				if (zlapany == NULL) repaintWindow(hWnd, hdc, ps, &lina);
+				else repaintWindow(hWnd, hdc, ps, &podniesiony);
 			}
-			repaintWindow(hWnd, hdc, ps, &lina);
-			if (zlapany != NULL) repaintWindow(hWnd, hdc, ps, &podniesiony);
 			break;
 		case 0x44:   // d
 			if (x < 600 && !kolizjahak(pierwszy, zlapany, 'd') && !kolizjahak(drugi, zlapany, 'd') && !kolizjahak(trzeci, zlapany, 'd') && !kolizjaklocka(zlapany, 'd'))
 			{
 				x += 2;
 				if (zlapany != NULL) zlapany->x += 2;
+				if (zlapany == NULL) repaintWindow(hWnd, hdc, ps, &lina);
+				else repaintWindow(hWnd, hdc, ps, &podniesiony);
 			}
-			repaintWindow(hWnd, hdc, ps, &lina);
-			if (zlapany != NULL) repaintWindow(hWnd, hdc, ps, &podniesiony);
 			break;
 		case VK_SPACE:
 			if (zlapany == NULL)
