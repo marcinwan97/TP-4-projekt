@@ -45,7 +45,11 @@ ATOM				MyRegisterClass(HINSTANCE hInstance);
 BOOL				InitInstance(HINSTANCE, int);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
-bool moznaodczepic(struct klocek* zlapany);
+bool kolizjahak(struct klocek sprawdzany, char klawisz);
+bool kolizjaklocka(char klawisz);
+bool moznaodczepic();
+bool moznapodniesc(struct klocek sprawdzany);
+bool moznaruszyc(char klawisz);
 
 void MyOnPaint(HDC hdc)
 {
@@ -140,7 +144,7 @@ void repaintWindow(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, RECT *drawArea)
 	if (x >= trzeci.x + 39 && x <= trzeci.x + 61 && y == trzeci.y - 1 && trzeci.masa <= udzwig)
 		hak = CreateSolidBrush(RGB(221, 170, 28));
 	if (zlapany != NULL) hak = CreateSolidBrush(RGB(168, 11, 0));
-	if (zlapany != NULL && moznaodczepic(zlapany)) hak = CreateSolidBrush(RGB(221, 170, 28));
+	if (zlapany != NULL && moznaodczepic()) hak = CreateSolidBrush(RGB(221, 170, 28));
 
 	if (drawArea == NULL)
 		InvalidateRect(hWnd, drawArea, TRUE); //	repaint all
@@ -149,50 +153,6 @@ void repaintWindow(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, RECT *drawArea)
 	hdc = BeginPaint(hWnd, &ps);
 	MyOnPaint(hdc);
 	EndPaint(hWnd, &ps);
-}
-
-bool kolizjahak(struct klocek sprawdzany, struct klocek* zlapany, char klawisz)
-{
-	if (zlapany != NULL) return false;					//	by nie blokowaæ opuszczania zlapanego klocka
-	if (klawisz == 's' && x >= sprawdzany.x - 9 && x <= sprawdzany.x + 109 && y >= sprawdzany.y - 1 && y < sprawdzany.y + 99) return true;
-	if (klawisz == 'w' && x >= sprawdzany.x - 9 && x <= sprawdzany.x + 109 && y == sprawdzany.y + 109) return true;
-	if (klawisz == 'a' && x == sprawdzany.x + 110 && y >= sprawdzany.y && y <= sprawdzany.y + 108) return true;
-	if (klawisz == 'a' && y >= sprawdzany.y + 109 && x == sprawdzany.x + 100) return true;
-	if (klawisz == 'd' && x == sprawdzany.x - 10 && y >= sprawdzany.y && y <= sprawdzany.y + 108) return true;
-	if (klawisz == 'd' && y >= sprawdzany.y + 109 && x == sprawdzany.x - 2) return true;
-	else return false;
-}
-
-bool kolizjaklocka(struct klocek* zlapany, char klawisz)
-{
-	if (zlapany == NULL) return false;			//	ta funkcja obejmuje tylko kolizje zlapanego klocka z innym klockiem
-	if (klawisz == 'w' && zlapany->y == pierwszy.y + 100 && zlapany->x >= pierwszy.x - 98 && zlapany->x <= pierwszy.x + 98) return true;	//	kolizja z gory
-	if (klawisz == 'w' && zlapany->y == drugi.y + 100 && zlapany->x >= drugi.x - 98 && zlapany->x <= drugi.x + 98) return true;
-	if (klawisz == 'w' && zlapany->y == trzeci.y + 100 && zlapany->x >= trzeci.x - 98 && zlapany->x <= trzeci.x + 98) return true;
-	if (klawisz == 's' && zlapany->y + 100 == pierwszy.y && zlapany->x >= pierwszy.x - 98 && zlapany->x <= pierwszy.x + 98) return true;	//	kolizja z dolu
-	if (klawisz == 's' && zlapany->y + 100 == drugi.y && zlapany->x >= drugi.x - 98 && zlapany->x <= drugi.x + 98) return true;
-	if (klawisz == 's' && zlapany->y + 100 == trzeci.y && zlapany->x >= trzeci.x - 98 && zlapany->x <= trzeci.x + 98) return true;
-	if (klawisz == 's' && zlapany->y == 420) return true;																					//	kolizja z podlozem
-	if (klawisz == 'a' && zlapany->x == pierwszy.x + 100 && zlapany->y >= pierwszy.y - 98 && zlapany->y <= pierwszy.y + 100) return true;	//	kolizja z lewej
-	if (klawisz == 'a' && zlapany->x == drugi.x + 100 && zlapany->y >= drugi.y - 98 && zlapany->y <= drugi.y + 100) return true;
-	if (klawisz == 'a' && zlapany->x == trzeci.x + 100 && zlapany->y >= trzeci.y - 98 && zlapany->y <= trzeci.y + 100) return true;
-	if (klawisz == 'd' && zlapany->x + 100 == pierwszy.x && zlapany->y >= pierwszy.y - 98 && zlapany->y <= pierwszy.y + 100) return true;	//	kolizja z prawej
-	if (klawisz == 'd' && zlapany->x + 100 == drugi.x && zlapany->y >= drugi.y - 98 && zlapany->y <= drugi.y + 100) return true;
-	if (klawisz == 'd' && zlapany->x + 100 == trzeci.x && zlapany->y >= trzeci.y - 98 && zlapany->y <= trzeci.y + 100) return true;
-	return false;
-}
-
-bool moznaodczepic(struct klocek* zlapany)
-{
-	if (kolizjaklocka(zlapany, 's') || zlapany->y == 420)
-	{
-		if (zlapany->y == 420) return true;
-		if (zlapany->kolor != drugi.kolor && zlapany->x >= drugi.x - 22 && zlapany->x <= drugi.x + 22) return true;
-		if (zlapany->kolor != trzeci.kolor && zlapany->x >= trzeci.x - 22 && zlapany->x <= trzeci.x + 22) return true;
-		if (zlapany->kolor != pierwszy.kolor && zlapany->x >= pierwszy.x - 22 && zlapany->x <= pierwszy.x + 22) return true;
-		return false;
-	}
-	return false;
 }
 
 int OnCreate(HWND window)
@@ -289,7 +249,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.hInstance		= hInstance;
 	wcex.hIcon			= LoadIcon(hInstance, MAKEINTRESOURCE(IDI_DRAW));
 	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground = (HBRUSH)(CreatePatternBrush(htlo));										//	malowanie tla wzorem z bitmapy
+	wcex.hbrBackground  = (HBRUSH)(CreatePatternBrush(htlo));										//	malowanie tla wzorem z bitmapy
 	wcex.lpszMenuName	= MAKEINTRESOURCE(IDC_DRAW);
 	wcex.lpszClassName	= szWindowClass;
 	wcex.hIconSm		= LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
@@ -456,7 +416,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		switch (wParam)
 		{
 		case 0x57:	 // w
-			if (y > 80 && !kolizjahak(pierwszy, zlapany, 'w') && !kolizjahak(drugi, zlapany, 'w') && !kolizjahak(trzeci, zlapany, 'w') && !kolizjaklocka(zlapany, 'w'))
+			if (moznaruszyc('w'))
 			{
 				y -= 2;
 				if (zlapany != NULL) zlapany->y -= 2;
@@ -465,7 +425,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			}
 			break;
 		case 0x53:	// s
-			if (y < 500 && !kolizjahak(pierwszy, zlapany, 's') && !kolizjahak(drugi, zlapany, 's') && !kolizjahak(trzeci, zlapany, 's') && !kolizjaklocka(zlapany, 's'))
+			if (moznaruszyc('s'))
 			{
 				y += 2;
 				if (zlapany != NULL) zlapany->y += 2;
@@ -474,7 +434,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			}
 			break;
 		case 0x41:    // a
-			if (x > 160 && !kolizjahak(pierwszy, zlapany, 'a') && !kolizjahak(drugi, zlapany, 'a') && !kolizjahak(trzeci, zlapany, 'a') && !kolizjaklocka(zlapany, 'a'))
+			if (moznaruszyc('a'))
 			{
 				x -= 2;
 				if (zlapany != NULL) zlapany->x -= 2;
@@ -483,7 +443,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			}
 			break;
 		case 0x44:   // d
-			if (x < 600 && !kolizjahak(pierwszy, zlapany, 'd') && !kolizjahak(drugi, zlapany, 'd') && !kolizjahak(trzeci, zlapany, 'd') && !kolizjaklocka(zlapany, 'd'))
+			if (moznaruszyc('d'))
 			{
 				x += 2;
 				if (zlapany != NULL) zlapany->x += 2;
@@ -494,7 +454,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case VK_SPACE:
 			if (zlapany == NULL)
 			{
-				if (x >= pierwszy.x + 39 && x <= pierwszy.x + 61 && y == pierwszy.y - 1 && pierwszy.masa <= udzwig)		//	czy mozna podniesc czerwony?
+				if (moznapodniesc(pierwszy))	//	czy mozna podniesc czerwony?
 				{
 					zlapany = &pierwszy;
 					EnableWindow(GetDlgItem(hWnd, ID_BUTTON1), false);		//	blokada zmiany masy podniesionego klocka i udzwigu
@@ -503,7 +463,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					EnableWindow(GetDlgItem(hWnd, ID_BUTTON8), false);
 					repaintWindow(hWnd, hdc, ps, &lina);
 				}
-				if (x >= drugi.x + 39 && x <= drugi.x + 61 && y == drugi.y - 1 && drugi.masa <= udzwig)		//	czy mozna podniesc zielony?
+				if (moznapodniesc(drugi))		//	czy mozna podniesc zielony?
 				{
 					zlapany = &drugi;
 					EnableWindow(GetDlgItem(hWnd, ID_BUTTON3), false);
@@ -512,7 +472,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					EnableWindow(GetDlgItem(hWnd, ID_BUTTON8), false);
 					repaintWindow(hWnd, hdc, ps, &lina);
 				}
-				if (x >= trzeci.x + 39 && x <= trzeci.x + 61 && y == trzeci.y - 1 && trzeci.masa <= udzwig)		//	czy mozna podniesc niebieski?
+				if (moznapodniesc(trzeci))		//	czy mozna podniesc niebieski?
 				{
 					zlapany = &trzeci;
 					EnableWindow(GetDlgItem(hWnd, ID_BUTTON5), false);
@@ -524,7 +484,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			}
 			else
 			{
-				if (zlapany != NULL && moznaodczepic(zlapany))				//	jesli cos zlapane, to czy mozna to odczepic?
+				if (zlapany != NULL && moznaodczepic())				//	jesli cos zlapane, to czy mozna to odczepic?
 				{
 					zlapany = NULL;
 					EnableWindow(GetDlgItem(hWnd, ID_BUTTON1), true);		//	odblokowanie wszystkich przyciskow
@@ -577,4 +537,81 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	}
 	return (INT_PTR)FALSE;
+}
+
+bool kolizjahak(struct klocek sprawdzany, char klawisz)
+{
+	if (zlapany != NULL) return false;					//	by nie blokowaæ opuszczania zlapanego klocka
+	if (klawisz == 's' && x >= sprawdzany.x - 9 && x <= sprawdzany.x + 109 && y >= sprawdzany.y - 1 && y < sprawdzany.y + 99) return true;
+	if (klawisz == 'w' && x >= sprawdzany.x - 9 && x <= sprawdzany.x + 109 && y == sprawdzany.y + 109) return true;
+	if (klawisz == 'a' && x == sprawdzany.x + 110 && y >= sprawdzany.y && y <= sprawdzany.y + 108) return true;
+	if (klawisz == 'a' && y >= sprawdzany.y + 109 && x == sprawdzany.x + 100) return true;
+	if (klawisz == 'd' && x == sprawdzany.x - 10 && y >= sprawdzany.y && y <= sprawdzany.y + 108) return true;
+	if (klawisz == 'd' && y >= sprawdzany.y + 109 && x == sprawdzany.x - 2) return true;
+	return false;
+}
+
+bool kolizjaklocka(char klawisz)
+{
+	if (zlapany == NULL) return false;			//	ta funkcja obejmuje tylko kolizje zlapanego klocka z innym klockiem
+	if (klawisz == 'w' && zlapany->y == pierwszy.y + 100 && zlapany->x >= pierwszy.x - 98 && zlapany->x <= pierwszy.x + 98) return true;	//	kolizja z gory
+	if (klawisz == 'w' && zlapany->y == drugi.y + 100 && zlapany->x >= drugi.x - 98 && zlapany->x <= drugi.x + 98) return true;
+	if (klawisz == 'w' && zlapany->y == trzeci.y + 100 && zlapany->x >= trzeci.x - 98 && zlapany->x <= trzeci.x + 98) return true;
+	if (klawisz == 's' && zlapany->y + 100 == pierwszy.y && zlapany->x >= pierwszy.x - 98 && zlapany->x <= pierwszy.x + 98) return true;	//	kolizja z dolu
+	if (klawisz == 's' && zlapany->y + 100 == drugi.y && zlapany->x >= drugi.x - 98 && zlapany->x <= drugi.x + 98) return true;
+	if (klawisz == 's' && zlapany->y + 100 == trzeci.y && zlapany->x >= trzeci.x - 98 && zlapany->x <= trzeci.x + 98) return true;
+	if (klawisz == 's' && zlapany->y == 420) return true;																					//	kolizja z podlozem
+	if (klawisz == 'a' && zlapany->x == pierwszy.x + 100 && zlapany->y >= pierwszy.y - 98 && zlapany->y <= pierwszy.y + 100) return true;	//	kolizja z lewej
+	if (klawisz == 'a' && zlapany->x == drugi.x + 100 && zlapany->y >= drugi.y - 98 && zlapany->y <= drugi.y + 100) return true;
+	if (klawisz == 'a' && zlapany->x == trzeci.x + 100 && zlapany->y >= trzeci.y - 98 && zlapany->y <= trzeci.y + 100) return true;
+	if (klawisz == 'd' && zlapany->x + 100 == pierwszy.x && zlapany->y >= pierwszy.y - 98 && zlapany->y <= pierwszy.y + 100) return true;	//	kolizja z prawej
+	if (klawisz == 'd' && zlapany->x + 100 == drugi.x && zlapany->y >= drugi.y - 98 && zlapany->y <= drugi.y + 100) return true;
+	if (klawisz == 'd' && zlapany->x + 100 == trzeci.x && zlapany->y >= trzeci.y - 98 && zlapany->y <= trzeci.y + 100) return true;
+	return false;
+}
+
+bool moznaodczepic()
+{
+	if (kolizjaklocka('s') || zlapany->y == 420)
+	{
+		if (zlapany->y == 420) return true;
+		if (zlapany->kolor != drugi.kolor && zlapany->x >= drugi.x - 22 && zlapany->x <= drugi.x + 22) return true;
+		if (zlapany->kolor != trzeci.kolor && zlapany->x >= trzeci.x - 22 && zlapany->x <= trzeci.x + 22) return true;
+		if (zlapany->kolor != pierwszy.kolor && zlapany->x >= pierwszy.x - 22 && zlapany->x <= pierwszy.x + 22) return true;
+		return false;
+	}
+	return false;
+}
+
+bool moznapodniesc(struct klocek sprawdzany)
+{
+	if (x >= sprawdzany.x + 39 && x <= sprawdzany.x + 61 && y == sprawdzany.y - 1 && sprawdzany.masa <= udzwig) return true;
+	return false;
+}
+
+bool moznaruszyc(char klawisz)
+{
+	switch (klawisz)
+	{
+	case 'w':
+		if (y > 80 && !kolizjahak(pierwszy, 'w') && !kolizjahak(drugi, 'w') && !kolizjahak(trzeci, 'w') && !kolizjaklocka('w'))
+			return true;
+		return false;
+		break;
+	case 's':
+		if (y < 500 && !kolizjahak(pierwszy, 's') && !kolizjahak(drugi, 's') && !kolizjahak(trzeci, 's') && !kolizjaklocka('s'))
+			return true;
+		return false;
+		break;
+	case 'a':
+		if (x > 160 && !kolizjahak(pierwszy, 'a') && !kolizjahak(drugi, 'a') && !kolizjahak(trzeci, 'a') && !kolizjaklocka('a'))
+			return true;
+		return false;
+		break;
+	case 'd':
+		if (x < 600 && !kolizjahak(pierwszy, 'd') && !kolizjahak(drugi, 'd') && !kolizjahak(trzeci, 'd') && !kolizjaklocka('d'))
+			return true;
+		return false;
+		break;
+	}
 }
